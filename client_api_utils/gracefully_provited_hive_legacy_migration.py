@@ -9,11 +9,16 @@ This tool comes with absolutely no maintenance
 """
 
 import sys
-import time
-import dataikuapi
+import time 
+
 import os
 import logging
 import traceback
+
+try:
+    import dataiku # From inside DSS
+except:
+    import dataikuapi as dataiku # from outside DSS
 
 class MigrationException (Exception):
     pass
@@ -22,7 +27,7 @@ class MigrationException (Exception):
 
 def patch_project(project):
     # Making sure parameter  type is the right one 
-    assert type(project) == dataikuapi.dss.project.DSSProject,"project  as the wrong type {}".format(type(project))
+    assert type(project) == dataiku.dss.project.DSSProject,"project  as the wrong type {}".format(type(project))
 
     logging.info("patching post MUS ")
     to_check = False
@@ -95,7 +100,7 @@ if __name__ == "__main__":
 
     dss_instance_url=sys.argv[1]# http(s)://your_server:yourdssport
     api_key=sys.argv[2]# generated from  your user profile
-    client=dataikuapi.DSSClient(dss_instance_url,api_key)
+    client=dataiku.DSSClient(dss_instance_url,api_key)
     main(client)
 
 
