@@ -1,6 +1,5 @@
-#!/usr/bin/python
-# Author joel.belafa@dataiku.com
-# Thanks to ppelissier for raising this  question
+#!/usr/bin/env python
+
 
 """ 
 
@@ -14,11 +13,7 @@ import time
 import dataikuapi
 import os
 import logging
-
-
-dss_instance_url="http://localhost:21100" # http(s)://your_server:yourdssport
-api_key="TmRB3MFZQph3BTLR2dqtDtwXifqMV9cV" # generated from  your user profile
-client=dataikuapi.DSSClient(dss_instance_url,api_key)
+import traceback
 
 class MigrationException (Exception):
     pass
@@ -26,18 +21,23 @@ class MigrationException (Exception):
 
 
 def patch_project(project):
-    
+    # Making sure parameter  type is the right one 
     assert type(project) == dataikuapi.dss.project.DSSProject,"project  as the wrong type {}".format(type(project))
 
     logging.info("patching post MUS ")
+    to_check = False
     for recipeDef in project.list_recipes():
         recipe = project.get_recipe(recipeDef.get("name"))
         definition = recipe.get_definition_and_payload()
+        # This try/except block aims to migrate hive settings using 2 different methods
+        logging.info("patching recipe {}".format(recipeDef.get("name")))
         try:
             logging.info("trying  method A - expecting definition and payload handling ")
+            json_definition = None
             try:
+                # success of the following call validates use of methode A 
                 json_definition = definition.get_json_payload()
-            except ValueError:
+            except :
                 raise MigrationException("Migration method not applicable")
 
             # Patch hive engine and  disable dataiku UDF 
@@ -46,38 +46,57 @@ def patch_project(project):
 
             # update JsonDefinition
             definition.set_json_payload(json_definition)
-        except MigrationException :
-            logging.info("trying  method A failed ")
-            logging.info("trying  method B")
+        except :
+            try:
+                logging.info("trying  method A failed ")
+                logging.info("trying  method B")
 
-            json_definition = definition.get_recipe_raw_definition()
-            json_definition["params"]["executionEngine"]="HIVESERVER2"
-            json_definition["params"]["addDkuUdf"]=False
-            definition.set_json_payload(json_definition)
+                json_definition = definition.get_recipe_raw_definition()
+                json_definition["params"]["executionEngine"]="HIVESERVER2"
+                json_definition["params"]["addDkuUdf"]=False
+                definition.set_json_payload(json_definition)
+            except Exception as e :
+                traceback.print_exception(*sys.exc_info())
+                to_check = True
+                logging.error("Please check recipe : "+recipeDef.get("name"))
 
         recipe.set_definition_and_payload(definition)
-    ogging.info("project patched successfully")
 
-    return 
+    logging.info("project patched successfully")
+
+    return to_check
 
 
 
 def main(client):
     
+    projects_migrated = []
+    projects_to_check = []
     for projectDef  in  client.list_projects():
-        projectKey = projectDef.get("projectKey")
-        project = client.get_project(projectKey)
-        try:
-            patch_project(project)
-        except 
+        project = client.get_project(projectDef.get("projectKey"))
+        if patch_project(project) :
+            projects_migrated.append(project.project_key)
+        else:
+            logging.error(" error(s) in  project : {}".format(project.project_key))
+            projects_to_check.append(project.project_key)
+
+    print "PROJECTS MIGRATED :"
+    print "\t{}".format("\n\t".join(projects_migrated))
+    print "PROJECTS TO CHECK (experiening issue) :"
+    print "\t{}".format("\n\t".join(projects_to_check))
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    if len(sys.argv) != 3:
+        print "wrong number of arguments "+ str(len(sys.argv))
+        print "USAGE  :{} script  DSS_INSTANCE_FULL_HTTP_ROOT_URL API_KEY".format(sys.argv[0])
+        exit(1)
 
 
+    dss_instance_url=sys.argv[1]# http(s)://your_server:yourdssport
+    api_key=sys.argv[2]# generated from  your user profile
+    client=dataikuapi.DSSClient(dss_instance_url,api_key)
+    main(client)
 
 
-
-
-
-
-
-
-client=dataikuapi.DSSClient(dss_instance_url,api_key)
+# END 
