@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
+# Thanks to Pierre Pelissier for raising this question
 
 """ 
-
-This is compatible with API of DSS 4.X  and DSS 5 
-This tool comes with absolutely no maintenance 
+This script patches legacy hive recipes to new HIVESERVER2 api 
+It's really handy when you migrate a project from a legacy DSS to a MUS instance
+The tool is compatible with API of DSS 4.X  and DSS 5 
+It comes with absolutely no maintenance 
 
 """
 
