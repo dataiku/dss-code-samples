@@ -94,7 +94,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     if len(sys.argv) != 3:
         print "wrong number of arguments "+ str(len(sys.argv))
-        print "USAGE  :{} script  DSS_INSTANCE_FULL_HTTP_ROOT_URL API_KEY".format(sys.argv[0])
+        print "USAGE  :{}  DSS_INSTANCE_FULL_HTTP_ROOT_URL API_KEY".format(sys.argv[0])
         exit(1)
 
 
