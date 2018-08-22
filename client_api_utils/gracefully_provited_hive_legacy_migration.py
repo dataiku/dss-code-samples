@@ -15,7 +15,7 @@ import logging
 import traceback
 
 from requests import Session
-
+import pprint
         
 
 try:
@@ -27,16 +27,29 @@ class MigrationException (Exception):
     pass
 
 
+def getClient(url,api_key):
+    client=dataiku.DSSClient(url,api_key)
+    if url.startswith('https'):
+        logging.debug("implementing https connection ")
+        # TODO  : implement request session with  custom ssl context  trusting 
+        logging.info(" This client will ignore SSL client verification ")
+    client.self._session.verify = False
+    return client 
 
 def patch_project(project):
     # Making sure parameter  type is the right one 
     assert type(project) == dataiku.dss.project.DSSProject,"project  as the wrong type {}".format(type(project))
+
+
 
     logging.info("patching post MUS ")
     to_check = False
     for recipeDef in project.list_recipes():
         recipe = project.get_recipe(recipeDef.get("name"))
         definition = recipe.get_definition_and_payload()
+        print "DEF BEFORE"
+        pprint.pprint(definition.data)
+        print "============="
         # This try/except block aims to migrate hive settings using 2 different methods
         logging.info("patching recipe {}".format(recipeDef.get("name")))
         try:
@@ -46,29 +59,35 @@ def patch_project(project):
                 # success of the following call validates use of methode A 
                 json_definition = definition.get_json_payload()
 
-                # Patch hive engine and  disable dataiku UDF 
-                json_definition.get("engineParams").get("hive")["executionEngine"]="HIVESERVER2"
-                json_definition.get("engineParams").get("hive")["addDkuUdf"] = False
-
-                # update JsonDefinition
-                definition.data = json_definition
-            except :
+                # Patch hive engine and  disable dataiku UDF
+                try:
+                    if str(json_definition.get("engineParams").get("hive").get("executionEngine")).startswith("HIVECLI") :
+                        json_definition.get("engineParams").get("hive")["executionEngine"]="HIVESERVER2"
+                        json_definition.get("engineParams").get("hive")["addDkuUdf"] = False
+                        definition.set_json_payload(json_definition)
+                except:
+                    pass
+            except  Exception as e :
+                print e.message
                 raise MigrationException("Migration method not applicable")
 
         except :
             try:
                 logging.info("trying  method A failed ")
                 logging.info("trying  method B")
-
-                json_definition = definition.get_recipe_raw_definition()
-                json_definition["params"]["executionEngine"]="HIVESERVER2"
-                json_definition["params"]["addDkuUdf"]=False
-                definition.set_json_payload(json_definition)
+                
+                recipe_def = definition.get_recipe_raw_definition()
+                if str(recipe_def.get("params").get("executionEngine")).startswith("HIVECLI"):
+                    recipe_def["params"]["executionEngine"]= "HIVESERVER2"
+                recipe_def["params"]["addDkuUdf"]=False
+                definition.data["recipe"] = recipe_def
             except Exception as e :
                 traceback.print_exception(*sys.exc_info())
                 to_check = True
                 logging.error("Please check recipe : "+recipeDef.get("name"))
 
+        print "DEF AFTER "
+        pprint.pprint(definition.data)
         recipe.set_definition_and_payload(definition)
 
     logging.info("project patched successfully")
@@ -103,6 +122,7 @@ if __name__ == "__main__":
     dss_instance_url=sys.argv[1]# http(s)://your_server:yourdssport
     api_key=sys.argv[2]# generated from  your user profile
     client=dataiku.DSSClient(dss_instance_url,api_key)
+    client.self._session.verify = False # COMMENT THIS FOR  SSL CERTIFICATE CHECK 
     main(client)
 
 
