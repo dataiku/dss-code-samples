@@ -27,15 +27,6 @@ class MigrationException (Exception):
     pass
 
 
-def getClient(url,api_key):
-    client=dataiku.DSSClient(url,api_key)
-    if url.startswith('https'):
-        logging.debug("implementing https connection ")
-        # TODO  : implement request session with  custom ssl context  trusting 
-        logging.info(" This client will ignore SSL client verification ")
-    client.self._session.verify = False
-    return client 
-
 def patch_project(project):
     # Making sure parameter  type is the right one 
     assert type(project) == dataiku.dss.project.DSSProject,"project  as the wrong type {}".format(type(project))
