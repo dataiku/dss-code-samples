@@ -3,11 +3,8 @@
 # Thanks to Pierre Pelissier for raising this question
 
 """ 
-This script patches legacy hive recipes to new HIVESERVER2 api 
-It's really handy when you migrate a project from a legacy DSS to a MUS instance
-The tool is compatible with API of DSS 4.X  and DSS 5 
-It comes with absolutely no maintenance 
-
+This is compatible with API of DSS 4.X and DSS 5 
+This tool comes with absolutely no maintenance 
 """
 
 import sys
@@ -16,6 +13,10 @@ import time
 import os
 import logging
 import traceback
+
+from requests import Session
+
+        
 
 try:
     import dataiku # From inside DSS
@@ -44,15 +45,16 @@ def patch_project(project):
             try:
                 # success of the following call validates use of methode A 
                 json_definition = definition.get_json_payload()
+
+                # Patch hive engine and  disable dataiku UDF 
+                json_definition.get("engineParams").get("hive")["executionEngine"]="HIVESERVER2"
+                json_definition.get("engineParams").get("hive")["addDkuUdf"] = False
+
+                # update JsonDefinition
+                definition.data = json_definition
             except :
                 raise MigrationException("Migration method not applicable")
 
-            # Patch hive engine and  disable dataiku UDF 
-            json_definition.get("engineParams").get("hive")["executionEngine"]="HIVESERVER2"
-            json_definition.get("engineParams").get("hive")["addDkuUdf"] = False
-
-            # update JsonDefinition
-            definition.set_json_payload(json_definition)
         except :
             try:
                 logging.info("trying  method A failed ")
@@ -73,13 +75,11 @@ def patch_project(project):
 
     return to_check
 
-
-
 def main(client):
     
     projects_migrated = []
     projects_to_check = []
-    for projectDef  in  client.list_projects():
+    for projectDef  in  client.list_projects(): 
         project = client.get_project(projectDef.get("projectKey"))
         if patch_project(project) :
             projects_migrated.append(project.project_key)
