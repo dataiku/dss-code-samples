@@ -26,6 +26,7 @@ except:
 class MigrationException (Exception):
     pass
 
+DEBUG = False
 
 def patch_project(project):
     # Making sure parameter  type is the right one 
@@ -38,9 +39,10 @@ def patch_project(project):
     for recipeDef in project.list_recipes():
         recipe = project.get_recipe(recipeDef.get("name"))
         definition = recipe.get_definition_and_payload()
-        print "DEF BEFORE"
-        pprint.pprint(definition.data)
-        print "============="
+        if DEBUG:
+            print "DEF BEFORE"
+            pprint.pprint(definition.data)
+            print "============="
         # This try/except block aims to migrate hive settings using 2 different methods
         logging.info("patching recipe {}".format(recipeDef.get("name")))
         try:
@@ -77,8 +79,11 @@ def patch_project(project):
                 to_check = True
                 logging.error("Please check recipe : "+recipeDef.get("name"))
 
-        print "DEF AFTER "
-        pprint.pprint(definition.data)
+        if DEBUG:
+            print "DEF AFTER "
+            pprint.pprint(definition.data)
+        if not definition.data.get("payload") :
+            definition.data["payload"] = "{}"
         recipe.set_definition_and_payload(definition)
 
     logging.info("project patched successfully")
@@ -104,16 +109,19 @@ def main(client):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    if len(sys.argv) != 3:
+    if len(sys.argv) < 3:
         print "wrong number of arguments "+ str(len(sys.argv))
-        print "USAGE  :{}  DSS_INSTANCE_FULL_HTTP_ROOT_URL API_KEY".format(sys.argv[0])
+        print "USAGE  :{} [--debug]  DSS_INSTANCE_FULL_HTTP_ROOT_URL API_KEY".format(sys.argv[0])
         exit(1)
 
-
+    if "--debug" in sys.argv:
+        DEBUG = True
+        sys.argv.remove("--debug")
+        logging.basicConfig(level=logging.DEBUG)
     dss_instance_url=sys.argv[1]# http(s)://your_server:yourdssport
     api_key=sys.argv[2]# generated from  your user profile
     client=dataiku.DSSClient(dss_instance_url,api_key)
-    client.self._session.verify = False # COMMENT THIS FOR  SSL CERTIFICATE CHECK 
+    client._session.verify = False # COMMENT THIS FOR  SSL CERTIFICATE CHECK 
     main(client)
 
 
