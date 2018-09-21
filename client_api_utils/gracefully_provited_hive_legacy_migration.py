@@ -13,8 +13,6 @@ import time
 import os
 import logging
 import traceback
-import requests
-from requests import Session
 import urlparse
 import pprint
         
@@ -91,9 +89,9 @@ def patch_project(project):
 
     return to_check
 
-def canReachDSS(dssURL):
-    request = requests.get(urlparse.urljoin(dssURL, "/dip/api/ping"))
-    return request.status_code == 200
+def canReachDSS(dssURL,client):
+    response = client._session.get(urlparse.urljoin(dssURL, "/dip/api/ping")) 
+    return response.status_code == 200
 
 
 
