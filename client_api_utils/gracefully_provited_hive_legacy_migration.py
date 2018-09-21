@@ -13,8 +13,9 @@ import time
 import os
 import logging
 import traceback
-
+import requests
 from requests import Session
+import urlparse
 import pprint
         
 
@@ -90,6 +91,12 @@ def patch_project(project):
 
     return to_check
 
+def canReachDSS(dssURL):
+    request = requests.get(urlparse.urljoin(dssURL, "/dip/api/ping"))
+    return request.status_code == 200
+
+
+
 def main(client):
     
     projects_migrated = []
@@ -118,10 +125,17 @@ if __name__ == "__main__":
         DEBUG = True
         sys.argv.remove("--debug")
         logging.basicConfig(level=logging.DEBUG)
+
     dss_instance_url=sys.argv[1]# http(s)://your_server:yourdssport
     api_key=sys.argv[2]# generated from  your user profile
     client=dataiku.DSSClient(dss_instance_url,api_key)
     client._session.verify = False # COMMENT THIS FOR  SSL CERTIFICATE CHECK 
+
+    # First check that DSS is reacheable 
+    if not canReachDSS(dss_instance_url):
+        logging.error("Can't reach DSS from {} , please check your URL ".format(dss_instance_url))
+        raise OSError("DSS not reachable {} ".format(dss_instance_url))
+
     main(client)
 
 
