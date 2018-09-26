@@ -88,7 +88,7 @@ def patch_project(project):
     logging.info("project patched successfully")
 
     return to_check
-
+    
 def canReachDSS(dssURL,client):
     response = client._session.get(urlparse.urljoin(dssURL, "/dip/api/ping")) 
     return response.status_code == 200
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     client._session.verify = False # COMMENT THIS FOR  SSL CERTIFICATE CHECK 
 
     # First check that DSS is reacheable 
-    if not canReachDSS(dss_instance_url):
+    if not canReachDSS(dss_instance_url,client):
         logging.error("Can't reach DSS from {} , please check your URL ".format(dss_instance_url))
         raise OSError("DSS not reachable {} ".format(dss_instance_url))
 
