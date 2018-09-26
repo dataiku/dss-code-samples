@@ -47,13 +47,24 @@ def deploy_bundle(project,bundle_id,filePath):
     # Making sure parameter  type is the right one 
     assert type(project) == dataiku.dss.project.DSSProject,"project  as the wrong type {}".format(type(project))
     assert os.path.exists(filePath)," Could not find bundle archive {}".format(filePath)
-    # make sure  no bundle was imported yet
 
+    # make sure  no bundle was imported yet
     if bundle_exists(project,bundle_id):
         raise ValueError("bundle is already imported on this project")
+
+    # Init project if it doesn't exists 
+    if  project.project_key in client.list_project_keys():
+        logging.info("project already exists")
+    else:
+        logging.info("trying to initialize new project {} with new bundle".format(project.project_key))
+        client.create_project(project.project_key,project.project_key,"admin", "")
+
+    logging.info("deploying bundle to node")
+    with open(filePath,"r") as fs:
+        project.import_bundle_from_stream(fs)
+
+    project.activate_bundle(bundle_id)
     # push bundle 
-    logging.info("deploying bundle to automaation node")
-    project.import_bundle_from_archive(filePath)
     return
 
 def bundle_exists(project,bundle_id):
@@ -110,18 +121,21 @@ if __name__ == "__main__":
     elif args.action == "create":
         bundle_id = args.bundle_name or "{}-v{}".format(args.project,str(datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d_%H_%M_%S')))
         bundle_full_path = args.bundle_path or os.path.join(os.path.abspath("."),bundle_id+".zip")
-        logging.info("=== creating bundle...")
+        logging.info("=== creating bundle {} from project {} ".format(bundle_id,args.project))
 
         export_bundle(project,bundle_id,bundle_full_path)
         logging.info("=== Done")
     elif args.action == "deploy":
-        logging.info("=== deploying bundle...")
+        logging.info("=== deploying bundle {} from project {} ".format(args.bundle_name,args.project))
         deploy_bundle(project,args.bundle_name,args.bundle_path)
         logging.info("=== Done")
     elif args.action == "download":
+        logging.info("=== download bundle {} from project {} ".format(bundle_id,args.project))
         if not bundle_exists(project,args.bundle_name):
-            raise ValueError("bundle doesn")
+            raise ValueError("bundle not found ")
         bundle_full_path = args.bundle_path or os.path.join(os.path.abspath("."),args.bundle_name+".zip")
+        if os.path.exists(bundle_full_path):
+            raise ValueError(" bundle archive {} already exists ".format(bundle_full_path))
         project.download_exported_bundle_archive_to_file(args.bundle_name,bundle_full_path)
 
     
