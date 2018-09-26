@@ -34,32 +34,33 @@ def export_bundle(project,bundle_id,filePath):
     # Making sure parameter  type is the right one 
     assert type(project) == dataiku.dss.project.DSSProject,"project  as the wrong type {}".format(type(project))
 
-    # generate bundle 
-    for bundleDef in project.list_exported_bundles().get("bundles"):
-        if bundle_id == bundleDef.get("bundleId"):
-            raise ValueError("bundle is already existing on this project")
-
+    # make sure bundle doesn't exist
+    if bundle_exists(project,bundle_id):
+        raise ValueError("bundle is already imported on this project")  
 
     new_bundle = project.export_bundle(bundle_id)
     project.download_exported_bundle_archive_to_file(bundle_id,filePath)
 
     return
 
-
 def deploy_bundle(project,bundle_id,filePath):
     # Making sure parameter  type is the right one 
     assert type(project) == dataiku.dss.project.DSSProject,"project  as the wrong type {}".format(type(project))
     assert os.path.exists(filePath)," Could not find bundle archive {}".format(filePath)
-    # generate bundle 
-    for bundle_id in project.list_exported_bundles().get("bundles"):
-        if bundleId == bundleDef.get("bundleId"):
-            raise ValueError("bundle is already imported on this project")
+    # make sure  no bundle was imported yet
 
-   
+    if bundle_exists(project,bundle_id):
+        raise ValueError("bundle is already imported on this project")
+    # push bundle 
     logging.info("deploying bundle to automaation node")
     project.import_bundle_from_archive(filePath)
+    return
 
-    return 
+def bundle_exists(project,bundle_id):
+    for bundleDef in project.list_exported_bundles().get("bundles"):
+        if bundle_id == bundleDef.get("bundleId"):
+            return True
+    return False
     
 def canReachDSS(dssURL,client):
     response = client._session.get(urlparse.urljoin(dssURL, "/dip/api/ping")) 
@@ -67,28 +68,11 @@ def canReachDSS(dssURL,client):
 
 
 
-def main(client,projectId,bundleId):
-    # get project 
-    projects_migrated = []
-    projects_to_check = []
-    for projectDef  in  client.list_projects(): 
-        project = client.get_project(projectDef.get("projectKey"))
-        if patch_project(project) :
-            projects_migrated.append(project.project_key)
-        else:
-            logging.error(" error(s) in  project : {}".format(project.project_key))
-            projects_to_check.append(project.project_key)
-
-    print "PROJECTS MIGRATED :"
-    print "\t{}".format("\n\t".join(projects_migrated))
-    print "PROJECTS TO CHECK (experiening issue) :"
-    print "\t{}".format("\n\t".join(projects_to_check))
-
 if __name__ == "__main__":
 
     # Parsing arguments for main
     parser = argparse.ArgumentParser(description="manage bundles ")
-    parser.add_argument("action", choices=["create","deploy"], help="List of actions to execute")
+    parser.add_argument("action", choices=["create","deploy","dowload"], help="List of actions to execute")
 
     parser.add_argument("project",type=str,help="project id")
     parser.add_argument("-d","--dss-host", type=str, help="dataiku design or automaation instance (starting with http or https) ")
@@ -113,10 +97,6 @@ if __name__ == "__main__":
     client._session.verify = args.check_certificate # COMMENT THIS FOR  SSL CERTIFICATE CHECK 
 
     logging.basicConfig(level=logging.INFO)
-    if len(sys.argv) < 3:
-        print "wrong number of arguments "+ str(len(sys.argv))
-        print "USAGE  :{} [--debug]  DSS_INSTANCE_FULL_HTTP_ROOT_URL API_KEY".format(sys.argv[0])
-        exit(1)
 
     if "--debug" == args.debug:
         DEBUG = True
@@ -125,6 +105,7 @@ if __name__ == "__main__":
     if not canReachDSS(dss_instance_url,client):
         logging.error("Can't reach DSS from {} , please check your URL ".format(dss_instance_url))
         raise OSError("DSS not reachable {} ".format(dss_instance_url))
+
 
     elif args.action == "create":
         bundle_id = args.bundle_name or "{}-v{}".format(args.project,str(datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d_%H_%M_%S')))
@@ -137,9 +118,6 @@ if __name__ == "__main__":
         logging.info("=== deploying bundle...")
         deploy_bundle(project,args.bundle_name,args.bundle_path)
         logging.info("=== Done")
-
-
-        
 
     
 
