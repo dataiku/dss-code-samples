@@ -43,7 +43,7 @@ def export_bundle(project,bundle_id,filePath):
 
     return
 
-def deploy_bundle(project,bundle_id,filePath):
+def deploy_bundle(project,bundle_id,filePath,activate=True):
     # Making sure parameter  type is the right one 
     assert type(project) == dataiku.dss.project.DSSProject,"project  as the wrong type {}".format(type(project))
     assert os.path.exists(filePath)," Could not find bundle archive {}".format(filePath)
@@ -62,8 +62,8 @@ def deploy_bundle(project,bundle_id,filePath):
     logging.info("deploying bundle to node")
     with open(filePath,"r") as fs:
         project.import_bundle_from_stream(fs)
-
-    project.activate_bundle(bundle_id)
+    if activate:
+        project.activate_bundle(bundle_id)
     # push bundle 
     return
 
@@ -91,9 +91,11 @@ if __name__ == "__main__":
     parser.add_argument("-k","--api-key", type=str, default=None, help="The api key used to connect to DSS instance ")
 
     parser.add_argument("-b","--bundle-name", type=str, default=None, help="the bundile id ")
+    parser.add_argument("--activate", type=bool, default=True, help="activate bundle when deploying ")
     parser.add_argument("-p","--bundle-path", type=str, default=None, help="the path of the bundle archive")
     parser.add_argument("--check-certificate", type=bool, default=True, help="check TLS certificate")
     parser.add_argument("--debug", type=bool, default=False, help="debug")
+
 
     args = parser.parse_args(sys.argv[1:])
 
@@ -127,7 +129,7 @@ if __name__ == "__main__":
         logging.info("=== Done")
     elif args.action == "deploy":
         logging.info("=== deploying bundle {} from project {} ".format(args.bundle_name,args.project))
-        deploy_bundle(project,args.bundle_name,args.bundle_path)
+        deploy_bundle(project,args.bundle_name,args.bundle_path,activate=args.activate)
         logging.info("=== Done")
     elif args.action == "download":
         logging.info("=== download bundle {} from project {} ".format(bundle_id,args.project))
