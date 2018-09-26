@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
     # Parsing arguments for main
     parser = argparse.ArgumentParser(description="manage bundles ")
-    parser.add_argument("action", choices=["create","deploy","dowload"], help="List of actions to execute")
+    parser.add_argument("action", choices=["create","deploy","download"], help="List of actions to execute")
 
     parser.add_argument("project",type=str,help="project id")
     parser.add_argument("-d","--dss-host", type=str, help="dataiku design or automaation instance (starting with http or https) ")
@@ -118,6 +118,11 @@ if __name__ == "__main__":
         logging.info("=== deploying bundle...")
         deploy_bundle(project,args.bundle_name,args.bundle_path)
         logging.info("=== Done")
+    elif args.action == "download":
+        if not bundle_exists(project,args.bundle_name):
+            raise ValueError("bundle doesn")
+        bundle_full_path = args.bundle_path or os.path.join(os.path.abspath("."),args.bundle_name+".zip")
+        project.download_exported_bundle_archive_to_file(args.bundle_name,bundle_full_path)
 
     
 
