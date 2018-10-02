@@ -30,6 +30,5 @@ print partition_list_value
 # add a build step to build the output dataset, and set ${partition_list} as the partition identifier
 
 # in a custom scenario:
-# launch the build
 # alternatively, in a custom scenario, you can pass the value directly, without using a variable
 #s.build_dataset(output_name, partitions=partition_list_value)
