@@ -4,6 +4,7 @@
 import dataikuapi
 import calendar
 from datetime import datetime
+import dateutil.parser
 
 HOST = "http://myhost:myport/"
 API_KEY = "MY_API_KEY"
