@@ -1,0 +1,29 @@
+<!-- Body of your web app -->
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<div style="height: 100%; display: flex; flex-flow: column nowrap;">
+    <div style="flex: 0 0 auto; padding: 10px;">
+        <div style="height: 30px; line-height: 20px;">
+            <span>X</span>
+            <div id="slider1" style="display: inline-block; margin-left: 10px; width: 100px;"></div>
+        </div>
+        <div style="height: 30px; line-height: 20px;">
+            <span>Y</span>
+            <div id="slider2" style="display: inline-block; margin-left: 10px; width: 100px;"></div>
+        </div>
+        <div style="height: 30px; line-height: 20px;">
+            <button id="refresh" style="display: inline-block; margin-left: 10px; width: 100px;">Refresh</button>
+        </div>
+    </div>
+    <div style="flex: 0 0 auto; padding: 10px;">
+        <p>The red box is the model as known in this instance of the webapp, defined by the sliders.</p>
+        <p>The red box is the model as known by the python backend, defined by the changes sent by all instances of the webapp opened by the current user.</p>
+    </div>
+    <div style="flex: 1 1 auto; position: relative;">
+        <div style="border: 1px solid grey; margin: 20px; position: absolute; top: 0; bottom: 0; left: 0; right: 0;">
+            <div style="height: 100%; width: 100%; padding: 0 10px 10px 0;">
+                <div id="plot" style="height: 100%; width: 100%; position: relative;"></div>
+            </div>
+        </div>
+    </div>
+</div>
