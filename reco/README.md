@@ -34,7 +34,7 @@ jinja2>=2.10,<2.11
 flask>=0.12,<0.13
 scikit-surprise==1.0.6
 ```
-2. Add the following Python files in your project's code libraries: https://github.com/dataiku/dss-code-samples/reco
+2. Add the following Python files in your project's code libraries: https://github.com/dataiku/dss-code-samples/tree/master/reco
     -  [without Internet access] you can copy paste the content of the files (do not forget `__init__.py`)
     - [with Internet access] you can add the `reco` path within this repository as a git reference in your code library, targeting the `python/reco` path.
 
