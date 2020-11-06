@@ -7,6 +7,18 @@ Various code samples for using DSS
 
 (DSS >= 8.0.3)
 
+#### Use within DSS (as project library)
+- Register in Project Lib Git
+- No need to specify remote DSS params
+- Profit
+
+#### Outside of DSS
+- Clone repository, tarzip it
+- Create virtualenv with dss requirements and tarzipped archive
+- Profit ...?
+
+You can reuse them as they are, customize them for your own needs, and even package them into plugins.
+
 Create a dedicated virtual environment and install the following packages:
 * `dataiku-internal-client`:  follow the instructions in the [DSS doc](https://doc.dataiku.com/dss/latest/python-api/outside-usage.html#installing-the-package)
 * `dataikuapi`: 
