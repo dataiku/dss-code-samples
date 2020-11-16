@@ -2,9 +2,19 @@
 
 ## TODO
 
-- [ ] List jobs currently running
+### Jobs 
+- [x] List jobs currently running
+
+### Projects
+- [x] Assign group permissions to project
+- [ ] Create & manage project folders
+### Code environments
 - [ ] Create a code environment from a list of packages
-- [ ] Programmatically add impersonation rules
-- [ ] Create API service infrastructure
 - [ ] Create a mapping between code environments and Python/R recipes
-- [ ] Create and manage project folders 
+
+### Security & user isolation
+- [ ] Programmatically add impersonation rules
+
+### Infrastructure
+- [ ] Create API service infrastructure
+
