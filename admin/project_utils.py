@@ -1,7 +1,5 @@
 import dataiku
 
-import dataiku
-
 def edit_project_permissions(client=None, project_key=None, group=None, perms=None, revoke=False):
     """Grant or revoke project permissions for a given group.
 
