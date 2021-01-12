@@ -1,6 +1,6 @@
 # Machine learning
 
-- [ ] List all models and corresp. active version in a project
+- [x] List all models and corresp. active version in a project
 - [ ] "Pure code" model training and batch scoring in PyTorch
 - [ ] "Pure code" model training and batch scoring in Tensorflow 2.x
 - [ ] Custom model deployed on API service
