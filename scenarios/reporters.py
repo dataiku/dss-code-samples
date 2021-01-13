@@ -15,7 +15,6 @@ def add_email_recipients(client=None, project_key=None, scenario_ids=[], recipie
     if not scenario_ids:
         print("No scenario id specified, will apply to ALL scenarios")
         scenario_ids = [scn["id"] for scn in prj.list_scenarios()]
-    
     for scn_id in scenario_ids:
         handle = prj.get_scenario(scn_id)
         settings = handle.get_settings()
