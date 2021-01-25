@@ -1,0 +1,3 @@
+- Keep a database connection persistent to speed up response time by opening a connection pool outside of the the API function
+- Image classification scoring on a custom deep learning model
+- 
