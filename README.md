@@ -9,7 +9,7 @@ This repository contains various examples of code-based operations for Dataiku D
 * Python >= 3.6
 
 **Within DSS**
-* Create a [Git reference]() in your DSS project pointing to this repository and import what you want/need in your recipes/notebooks/etc.
+* Create a [Git reference](https://doc.dataiku.com/dss/latest/collaboration/import-code-from-git.html) in your DSS project pointing to this repository and import what you want/need in your recipes/notebooks/etc.
 * You can also just copy-paste directly in your project libraries/recipes/notebooks/etc. the parts you're interested in.
 
 **Outside of DSS**
