@@ -1,0 +1,4 @@
+dataiku-api-client
+pandas==0.23.4
+radon
+pytest

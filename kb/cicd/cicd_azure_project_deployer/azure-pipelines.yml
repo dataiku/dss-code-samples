@@ -1,0 +1,127 @@
+pool: dss-pipeline-agent-pool
+
+parameters:
+- name: DSS_PROJECT
+  displayName: Project (key) to deploy
+  type: string
+  default: DKU_CHURN
+- name: DESIGN_URL
+  displayName: Design node URL
+  type: string
+  default: http://10.0.0.4:10000
+- name: DESIGN_API_KEY
+  displayName: Design node API key
+  type: string
+  default: edZPVCiyuk18jmLSDiy9KnIJeK17scdB
+- name: AUTO_PREPROD_ID
+  displayName: Infra ID of the Preprod
+  type: string
+  default: auto-preprod
+- name: AUTO_PREPROD_URL
+  displayName: PREPROD node URL
+  type: string
+  default: http://10.0.0.8:10000
+- name: AUTO_PREPROD_API_KEY
+  displayName: PREPROD node API key
+  type: string
+  default: xKV17lUA9sETrwOhssye52s8kUIVBdUV
+- name: AUTO_PROD_ID
+  displayName: Infra ID of the Prod
+  type: string
+  default: auto-prod
+- name: AUTO_PROD_API_KEY
+  displayName: PROD node API key
+  type: string
+  default: uE4zPd6W1sIIorHqXAaDnYPkwtA2cezL
+- name: AUTO_PROD_URL
+  displayName: PROD node URL
+  type: string
+  default: http://10.0.0.9:10000
+  
+jobs:
+- job: PREPARE
+  displayName: '0. Preparation'
+  steps:
+  - bash: |
+      val="bundle_`date +%Y-%m-%d_%H-%m-%S`"
+      echo $val
+      echo "##vso[task.setvariable variable=bundle;isOutput=true;]$val"
+    displayName: 'Set bundle id'
+    name: SetVar
+  - script: cat requirements.txt
+  - script: printenv
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.6'
+  - script: python -m pip install --upgrade pip setuptools wheel
+    displayName: 'Install tools'
+  - script: pip install -r requirements.txt
+    displayName: 'Install requirements'
+  
+- job: VALIDATE
+  dependsOn: 'PREPARE'
+  displayName: '1. Project Validation'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.6'
+    - bash: |
+        python -m pytest 1_project_validation/run_test.py -o junit_family=xunit1 --host='${{ parameters.DESIGN_URL }}' --api='${{ parameters.DESIGN_API_KEY }}' --project='${{ parameters.DSS_PROJECT }}' --junitxml=reports/PROJECT_VALIDATION.xml
+      displayName: 'pytest'
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFiles: 'reports/**/*.xml'
+        testRunTitle: 'Project validation test results'
+
+- job: PACKAGE
+  dependsOn: ['VALIDATE','PREPARE']
+  displayName: '2. Package and Publish'
+  variables: 
+      bundle_id: $[ dependencies.PREPARE.outputs['setVar.bundle'] ]
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.6'
+    - bash: |
+        python 2_package_bundle/run_bundling.py '${{ parameters.DESIGN_URL }}' '${{ parameters.DESIGN_API_KEY }}' '${{ parameters.DSS_PROJECT }}' '$(bundle_id)'
+      displayName: 'Create bundle'
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(bundle_id).zip'
+        artifactType: 'pipeline'
+
+- job: PREPROD
+  dependsOn: ['PACKAGE','PREPARE']
+  displayName: '3. Preprod testing'
+  variables: 
+      bundle_id: $[ dependencies.PREPARE.outputs['setVar.bundle'] ]
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.6'
+    - script: ls -la
+    - bash: |
+        python 3_preprod_test/import_bundle.py '${{ parameters.DESIGN_URL }}' '${{ parameters.DESIGN_API_KEY }}' '${{ parameters.DSS_PROJECT }}' $(bundle_id) '${{ parameters.AUTO_PREPROD_ID }}'
+      displayName: 'Upload in preprod'
+    - bash: |
+        python -m pytest 3_preprod_test/run_test.py -o junit_family=xunit1 --host='${{ parameters.AUTO_PREPROD_URL }}' --api='${{ parameters.AUTO_PREPROD_API_KEY }}' --project='${{ parameters.DSS_PROJECT }}' --junitxml=reports/PREPROD_TEST.xml
+      displayName: 'Run tests'
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFiles: 'reports/**/*.xml'
+        testRunTitle: 'Preprod test results'
+
+- job: PRODUCTION
+  dependsOn: ['PREPROD','PREPARE']
+  displayName: '4. Production deployment'
+  variables: 
+      bundle_id: $[ dependencies.PREPARE.outputs['setVar.bundle'] ]
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.6'
+    - bash: |
+        python 4_deploy_prod/deploy_bundle.py '${{ parameters.DESIGN_URL }}' '${{ parameters.DESIGN_API_KEY }}' '${{ parameters.DSS_PROJECT }}' '$(bundle_id)' '${{ parameters.AUTO_PROD_ID }}' '${{ parameters.AUTO_PROD_URL }}' '${{ parameters.AUTO_PROD_API_KEY }}'
+      displayName: 'Upload in Prod'
