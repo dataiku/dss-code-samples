@@ -1,5 +1,4 @@
-#dataiku-api-client
-git+https://github.com/dataiku/dataiku-api-client-python@release/9.0
+dataiku-api-client >=9.0.0
 radon
 pytest
 pytest-azurepipelines
