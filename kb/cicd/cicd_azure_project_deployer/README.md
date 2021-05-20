@@ -1,4 +1,4 @@
-# CI/CD pipeline sample with Jenkins
+# CI/CD pipeline sample with Azure DevOps
 
 This is the code for an Azure pipeline to build a full CI/CD sample flow. The Azure pipeline definition itself is in the azure-pipelines.yml file.
 
