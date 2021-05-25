@@ -44,21 +44,3 @@ def filter_jobs_by_start_date(client=None, project_key=None, start_date=None):
     jobs_after_start_date = {_status: [job for job in _list if is_after_start_date(job, start_date_timestamp)] for _status, _list in jobs_by_status.items()}
     return jobs_after_start_date 
 
-
-def abort_all_running_jobs(client=None, project_key=None):
-    """Terminate all running jobs in a project.
-
-    Args:
-        client: A handle on the target DSS instance
-        project_key: A string representing the target project key
-    """
-
-    project = client.get_project(project_key)
-    aborted_jobs = []
-    for job in project.list_jobs():
-        if not job["stableState"]:
-            job_id = job["def"]["id"]
-            aborted_jobs.append(job_id)
-            project.get_job(job_id).abort()
-    print(f"Deleted {len(aborted_jobs)} running jobs")
-
