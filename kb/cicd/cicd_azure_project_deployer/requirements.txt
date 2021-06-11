@@ -1,0 +1,4 @@
+dataiku-api-client >=9.0.0
+radon
+pytest
+pytest-azurepipelines
