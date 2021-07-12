@@ -6,4 +6,4 @@ I want to progtrammatically add multiple email recipients to a scneario's report
 
 ## Answers
 
-This is possible by editing the settings of the scenario thanks to the Scenario API.
+This is possible by editing the settings of the scenario thanks to the [Scenario API](https://doc.dataiku.com/dss/latest/python-api/scenarios.html).
