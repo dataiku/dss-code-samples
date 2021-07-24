@@ -10,7 +10,7 @@ def delete_deployment(deploymentId=None):
     deployer = client.get_apideployer()
     deployment = deployer.get_deployment(deploymentId)
     settings = deployment.get_settings()
-    settings.set_enabled(enabled=True)
+    settings.set_enabled(enabled=False)
     settings.save()
 
     # Delete deployment once it has been disabled
