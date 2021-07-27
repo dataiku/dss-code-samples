@@ -1,6 +1,9 @@
 import dataiku
 
 def get_instance_default_code_env(client=None):
+    """Return the global default code envs (instance-level).
+    """
+
     defaults = {}
     general_settings = client.get_general_settings()
     for rcp_type in [("python", "defaultPythonEnv"), ("r", "defaultREnv")]:
@@ -14,26 +17,15 @@ def get_instance_default_code_env(client=None):
 
 def get_code_env_mapping(client=None, project_key=None):
     """Return a dict mapping code-based items with their code envs.
-    Example of output:
-    {
-        "python": {
-            "recipes": [{"name": "xxx", "code_env": "yyy"}, ...],
-            "notebooks": [{"name": "xxx", code_env": "yy"}]
-            }
-        "r": {
-            ...
-            }
-    }
     """
+
     rcp_types = ["python", "r"]
     mapping = {"python": [], "r": []}
 
     prj = client.get_project(project_key)
 
-    # Retrieve the project's default code env
-    settings = prj.get_settings()
     env_default = {}
-
+    settings = prj.get_settings()
     prj_default_modes = settings.get_raw()["settings"]["codeEnvs"]
     all_recipes = prj.list_recipes()
     for rcp_type in rcp_types:
