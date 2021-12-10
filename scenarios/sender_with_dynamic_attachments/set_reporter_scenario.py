@@ -71,6 +71,7 @@ reporter["messaging"]["configuration"]["attachments"] = []
 
 # Add non-empty datasets to attachments
 for k,v  in datasets_record_counts.items():
+    # Simple predicate: only attach non-empty Datasets (i.e. nb of rows > 0)
     if int(v) > 0:
         attachment = copy.deepcopy(ATTACHMENT_TEMPLATE)
         attachment["params"]["attachedDataset"] = k
