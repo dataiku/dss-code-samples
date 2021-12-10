@@ -14,5 +14,10 @@ One possible solution for this problem relies on 2 scenarios:
 We assume that you already have a configured email channel on your instance that you will use for your reporter.
 
 1. In your project, create the "sender" Scenario (called `sender_scenario` in the code), add an email reporter on it, then save your changes.
-2. Create a new "Custom Python script" Scenario that will be our "reporter setup" Scenario. Copy-paste the code of the `set_reporter_scenario.py` file in it, don't forget to set the `SENDER_SCENARIO` constant accordingly
-3. Run the "reporter setup" Scenario
+2. Create a new "Custom Python script" Scenario that will be our "reporter setup" Scenario. Copy-paste the code of the `set_reporter_scenario.py` file in it, don't forget to set the `SENDER_SCENARIO` constant accordingly.
+3. Run the "reporter setup" Scenario.
+
+## References
+
+* [[doc](https://doc.dataiku.com/dss/latest/python-api/scenarios-inside.html)] Custom Python script Scenarios
+* [[doc](https://doc.dataiku.com/dss/latest/python-api/scenarios.html)] Public API reference for Scenarios

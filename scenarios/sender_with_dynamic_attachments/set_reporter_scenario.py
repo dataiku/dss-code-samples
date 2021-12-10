@@ -1,6 +1,7 @@
 import dataiku
 import copy
 
+# Template to reuse when adding attachments to the sender_scenario settings
 ATTACHMENT_TEMPLATE = {'params': {'attachedDataset': '',
       'exportParams': {'advancedMode': False,
        'destinationDatasetProjectKey': '',
