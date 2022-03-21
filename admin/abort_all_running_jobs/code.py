@@ -3,9 +3,9 @@ import dataiku
 def abort_all_running_jobs(client=None, project_key=None):
     """Terminate all running jobs in a project.
 
-    Args:
-        client: A handle on the target DSS instance
-        project_key: A string representing the target project key
+    :param client: A DSS client handle
+    :param project_key: A string containing the project key
+
     """
 
     project = client.get_project(project_key)
