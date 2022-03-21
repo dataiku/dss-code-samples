@@ -2,6 +2,11 @@ import dataiku
 
 def get_discussions_from_object(object_handle=None):
     """Return all discussion messages from a commentable object.
+
+    :param object_handle: The API handle of the target commentable object
+
+    :returns: A list of discussions with all their respective message data
+    :rtype: list
     """
     
     disc_data = []
@@ -22,6 +27,14 @@ def get_discussions_from_object(object_handle=None):
 
         
 def export_project_discussions(client=None, project_key=None):
+    """Return all discussion data for a given Project.
+
+    :param client: A DSS client handle
+    :param project_key: A string containing the project key
+
+    :returns: A dictionary mapping each commentable object type to a list of discussions.
+    :rtype: dict
+    """
     proj_disc = {}
     project = client.get_project(project_key)
     dispatch = {
