@@ -1,3 +1,8 @@
+###########################################################################################
+# !! CUSTOM SCENARIO EXAMPLE !!                                                           #
+# See https://doc.dataiku.com/dss/latest/scenarios/custom_scenarios.html for more details #
+###########################################################################################
+
 import time
 import dataiku
 from dataiku.scenario import Scenario, BuildFlowItemsStepDefHelper
