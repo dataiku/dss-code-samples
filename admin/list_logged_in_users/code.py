@@ -1,7 +1,12 @@
 import dataiku
 
-def list_logged_in_users(client=None):
+def list_connected_users(client=None):
     """List logged in users programmatically.
+
+    :params client: A DSS client handle
+
+    :return: A list of connected users
+    :rtype: list
     """
     
     user_list = []
