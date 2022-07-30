@@ -8,7 +8,7 @@ The examples referenced in this repository take advantage of the [Dataiku DSS pu
 All contributions are more than welcome! If you wish to submit an idea, feel free to open an issue and/or submit a pull request.
 
 ## License
-Copyright (C) 2021 Dataiku
+Copyright (C) 2022 Dataiku
 Licensed under the Apache License, version 2.0
 
 
