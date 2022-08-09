@@ -47,8 +47,8 @@ preprocessor = ColumnTransformer(
 
 
 # (3)
-hparams_dict = {"learning_rate": [0.1, 0.05],
-    "n_estimators": [10, 20],
+hparams_dict = {"learning_rate": [1e-3, 1e-4],
+    "n_estimators": [250, 500, 1000],
     "seed": [47]
 }
 
