@@ -1,19 +1,14 @@
 import dataiku
-import mlflow
-import mlflow.catboost
 import pandas as pd
 from catboost import CatBoostClassifier, Pool, cv
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelBinarizer
-from sklearn import metrics
 from dataikuapi.dss.ml import DSSPredictionMLTaskSettings
 
 # !! - Replace these values by your own - !!
-USER_PROJECT_KEY = "YOUR-PROJECT-KEY"
-USER_XPTRACKING_FOLDER_ID = "YOUR-XP-TRACKING-FOLDER-ID"
-USER_EXPERIMENT_NAME = "YOUR-EXPERIMENT-NAME"
-USER_TRAINING_DATASET = "YOUR-TRAINING-DATASET-NAME"
-USER_MLFLOW_CODE_ENV_NAME = "YOUR-MLFLOW-CODE-ENV-NAME"
+USER_PROJECT_KEY = ""
+USER_XPTRACKING_FOLDER_ID = ""
+USER_EXPERIMENT_NAME = ""
+USER_TRAINING_DATASET = ""
+USER_MLFLOW_CODE_ENV_NAME = ""
 
 client = dataiku.api_client()
 project = client.get_project(USER_PROJECT_KEY)
@@ -23,10 +18,9 @@ ds = dataiku.Dataset(USER_TRAINING_DATASET)
 df = ds.get_dataframe()
 
 cat_features= ["job", "marital", "education", "default", "housing","loan", "month", "contact", "poutcome"]
-num_features= ["age", "balance", "day", "duration", "campaign"]
-target_col ="y"
-X = df.drop(target_col, axis=1)
-y = LabelBinarizer().fit_transform(df[target_col[0]])
+target ="y"
+X = df.drop(target, axis=1)
+y = df[target]
 
 # (2)
 params = {
@@ -58,8 +52,8 @@ with project.setup_mlflow(managed_folder=USER_XPTRACKING_FOLDER_ID) as mlflow:
                     plot= False)
         
         for x in range(len(scores.index)):
-            mlflow.log_metric(key='mean_AUC', value=scores['test-AUC-mean'][x], step=x+1)
-            mlflow.log_metric(key='sd_AUC', value=scores['test-AUC-std'][x], step=x+1)
+            mlflow.log_metric(key='mean_AUC', value=scores['test-AUC-mean'][x], step=x)
+            mlflow.log_metric(key='sd_AUC', value=scores['test-AUC-std'][x], step=x)
 
         mlflow.log_params(params=params)
         
@@ -79,4 +73,4 @@ with project.setup_mlflow(managed_folder=USER_XPTRACKING_FOLDER_ID) as mlflow:
             prediction_type="BINARY_CLASSIFICATION",
             classes=['no', 'yes'],
             code_env_name=USER_MLFLOW_CODE_ENV_NAME,
-            target=target_col)
+            target=target)
